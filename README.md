@@ -1,18 +1,96 @@
-# ipl-data-tracker
+# Dockerized IPL Data Tracker Application
 
-This project aims to deliver a robust and scalable IPL information platform by leveraging the strengths of Spring Boot for building Microservices and MySQL for reliable data storage.
+This document provides instructions for running the IPL Data Tracker application using Docker.
 
-## Project Structure
+## Prerequisites
 
-The project is structured as follows:
+- Docker installed on your machine
+- Docker Compose installed on your machine
 
-- **player-service**: This microservice is responsible for managing player data. It includes endpoints for adding players, retrieving player details by ID, and fetching players by team.
-- **stats-service**: This microservice handles statistical data. It includes endpoints for adding stats, retrieving stats by ID, and fetching stats by player or team.
-- **team-service**: This microservice handles team-related data. It provides endpoints for adding teams, retrieving team details by ID, and fetching teams by player.
-- **match-service**: This microservice manages match data. It includes endpoints for adding matches, retrieving match details by ID, and fetching matches by team or player.
-- **api-gateway**: This microservice acts as the entry point for the entire system. It routes requests to the appropriate microservice based on the request path.
-- **eureka-server**: This microservice acts as a service registry and discovery server. It helps in locating and managing microservices within the system.
-- **config-server**: This microservice provides centralized configuration management. It allows for dynamic configuration updates across all microservices.
-- **hystrix-dashboard**: This microservice provides a dashboard for monitoring and managing circuit breakers and other fault tolerance mechanisms.
-- **zipkin-server**: This microservice provides distributed tracing capabilities. It helps in monitoring and debugging the flow of requests across microservices.
-- **zuul-server**: This microservice acts as a reverse proxy and API gateway. It routes requests to the appropriate microservice based on the request path.
+## Services
+
+The application consists of the following services:
+
+1. **MySQL Database** - Stores all application data
+2. **Discovery Server** - Eureka service registry for service discovery
+3. **API Gateway** - Routes requests to appropriate microservices
+4. **Player Service** - Manages player data
+5. **Match Service** - Manages match data
+6. **Scorecard Service** - Manages scorecard data
+7. **Team Service** - Manages team data
+
+## Building and Running the Application
+
+### Option 1: Using Docker Compose
+
+1. Navigate to the root directory of the project where the `docker-compose.yml` file is located.
+
+2. Build and start all services:
+   ```bash
+   docker-compose up -d
+   ```
+
+3. To view logs:
+   ```bash
+   docker-compose logs -f
+   ```
+
+4. To stop all services:
+   ```bash
+   docker-compose down
+   ```
+
+### Option 2: Building and Running Individual Services
+
+If you want to build and run services individually:
+
+1. Build a service (e.g., discovery-server):
+   ```bash
+   cd discovery-server
+   docker build -t discovery-server .
+   ```
+
+2. Run the service:
+   ```bash
+   docker run -p 8761:8761 discovery-server
+   ```
+
+## Accessing the Services
+
+- **Eureka Dashboard**: http://localhost:8761
+- **API Gateway**: http://localhost:8090
+- **Player Service API**: http://localhost:8090/players
+- **Match Service API**: http://localhost:8090/matches
+- **Scorecard Service API**: http://localhost:8090/scorecards
+- **Team Service API**: http://localhost:8090/teams
+
+## Environment Variables
+
+The following environment variables can be modified in the `docker-compose.yml` file:
+
+- **Database Configuration**:
+  - `MYSQL_ROOT_PASSWORD`: Database root password
+  - `MYSQL_DATABASE`: Database name
+
+- **Service Configuration**:
+  - `SPRING_PROFILES_ACTIVE`: Set to "docker" to use Docker-specific configurations
+  - `SPRING_DATASOURCE_URL`: JDBC URL for database connection
+  - `SPRING_DATASOURCE_USERNAME`: Database username
+  - `SPRING_DATASOURCE_PASSWORD`: Database password
+  - `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE`: URL for Eureka service discovery
+
+## Troubleshooting
+
+1. **Services not connecting to Eureka**:
+   - Check if the discovery-server is running: `docker ps | grep discovery-server`
+   - Verify network connectivity: `docker network inspect score_default`
+
+2. **Database connection issues**:
+   - Check if MySQL is running: `docker ps | grep mysql`
+   - Verify database credentials in docker-compose.yml
+   - Check service logs: `docker-compose logs mysql`
+
+3. **Service not starting**:
+   - Check service logs: `docker-compose logs service-name`
+   - Verify that the Dockerfile is correctly configured
+   - Ensure the ENTRYPOINT in the Dockerfile points to the correct main class
